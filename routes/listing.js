@@ -1,22 +1,9 @@
 const express = require("express");
 const router = express.Router();
 const wrapAsync = require("../utils/wrapAsync.js");
-const ExpressError = require("../utils/ExpressError.js");
-const {listingSchema} = require("../schema.js");
 const Listing  = require("../models/listing.js");
-const {isLoggedIn} = require("../middleware.js");
+const {isLoggedIn, isOwner,validateListing} = require("../middleware.js");
 
-// for server side validation for listing
-const validateListing = (req,res,next) =>{
-     let {error} =  listingSchema.validate(req.body);
-           if(error) {
-            let errMsg = error.details.map((el)=> el.message).join(",");
-            throw new ExpressError(400, errMsg);
-           }
-           else {
-            next();
-           }
-};
 
 // index route
 
@@ -67,6 +54,7 @@ router.post("/",
 // edit route
    router.get("/:id/edit",
     isLoggedIn,
+    isOwner,
      wrapAsync(async (req,res) => {
         //  if(!req.body ||req.body.listing) {
         //     throw new ExpressError(400,"Send Valid data for listing");
@@ -82,18 +70,22 @@ router.post("/",
  );
 
     // Update Routr
-    // app.put("/listings/:id", async(req,res) => {
+    // router.put(
+    //  "/:id",
+    //  isLoggedIn,
+    //  validateListing,
+    //  wrapAsync(async(req,res) => {
     //   let {id}= req.params;
     //  await Listing.findByIdAndUpdate(id,{...req.body.listing});
+    //  req.flash("success","Listing Updated!");
     //  res.redirect(`/listings/${id}`);
-    // //  res.redirect("/listings");
-    // // console.log(req.body);
 
-    // });
+    //  }));
 
  // CORRECT Update Routr
 router.put("/:id",
     isLoggedIn,
+    isOwner,
     validateListing, 
     wrapAsync(async(req,res) => {
     let {id}= req.params;
@@ -115,13 +107,14 @@ router.put("/:id",
 
     // 3. Update the database with the corrected data structure
     await Listing.findByIdAndUpdate(id, listingData);
-       req.flash("success","Listing Updated!");
+     req.flash("success","Listing Updated!");
     res.redirect(`/listings/${id}`);
 }));
 
 // delete route
   router.delete("/:id",
     isLoggedIn,
+    isOwner,
      wrapAsync(async(req,res) => {
         let {id} = req.params;
        let deletedListing = await Listing.findByIdAndDelete(id);
