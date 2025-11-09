@@ -10,18 +10,12 @@ const listingSchema = new Schema ( {
        required : true,
     },
     description: String,
-   //  image: {
-   //       filename: {
-   //          type: String,
-   //       },
-   //       url: {
-   //          type:String,
-   //          default: "https://unsplash.com/photos/river-in-the-middle-of-green-grass-and-trees-XY9x47itiZM",
-   //           set: (v) => v === "" ? "https://unsplash.com/photos/river-in-the-middle-of-green-grass-and-trees-XY9x47itiZM" 
-   //       : v,
-
-   //       },
-       // from gemini
+    image: {
+         url: String,
+         filename: String,
+       
+   },
+    //    from gemini
         image: {
         url: {
             type: String,
